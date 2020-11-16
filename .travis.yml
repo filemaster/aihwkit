@@ -16,7 +16,7 @@ notifications:
 #   only:
 #     - "master"
 
-sudo: required
+# sudo: required // Sudo is deprecated
 
 language: python
 
@@ -24,108 +24,17 @@ services: docker
 
 # Setup Travis to use Ubuntu 18.04 - Bionic
 os:
-  - linux
   - osx
 
 stages:
   - Build OSX wheels
-  - Test and lint
-  - Test multiple python versions
-  - Build Linux wheels
-
-# Parent stage definition, to avoid copy-pasting.
-job_compile_common: &job_compile_common
-  os: linux
-  before_install:
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - sudo apt-get update
-    - sudo apt-get install -y libopenblas-dev gcc-8 g++-8
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-  install:
-    # Set the python executable, to force cmake picking the right one.
-    - PYTHON_EXECUTABLE=~/virtualenv/python$TRAVIS_PYTHON_VERSION/bin/python$TRAVIS_PYTHON_VERSION
-    - pip install -r requirements.txt pytest
-    # Install the package in editable mode.
-    - VERBOSE=1 pip install -v -e .
-  script:
-    - pip install "parameterized==0.7.4"
-    - make pytest
-
 
 jobs:
   include:
-  - name: "Compile and test. Python 3.6"
-    os: linux
-    dist: bionic
-    <<: *job_compile_common
-    stage: Test and lint
-    python: "3.6"
-
-  - name: "Compile and lint. Python 3.6"
-    os: linux
-    dist: bionic
-    <<: *job_compile_common
-    stage: Test and lint
-    python: "3.6"
-    script:
-      - pip install -r requirements-dev.txt
-      - make pycodestyle
-      - make pylint
-      - make mypy
-
-  - name: "Compile and test. Python 3.7"
-    os: linux
-    dist: bionic
-    <<: *job_compile_common
-    stage: Test multiple python versions
-    python: "3.7"
-
-  - name: "Compile and test. Python 3.8"
-    os: linux
-    dist: bionic
-    <<: *job_compile_common
-    stage: Test multiple python versions
-    python: "3.8"
-
-  - name: "Compile and test. Python 3.6, Torch 1.5"
-    os: linux
-    dist: bionic
-    <<: *job_compile_common
-    stage: Test multiple python versions
-    python: "3.6"
-    install:
-      # Set the python executable, to force cmake picking the right one.
-      - PYTHON_EXECUTABLE=~/virtualenv/python$TRAVIS_PYTHON_VERSION/bin/python$TRAVIS_PYTHON_VERSION
-      - pip install "torch==1.5.1"
-      - pip install -r requirements.txt pytest
-      # Install the package in editable mode.
-      - VERBOSE=1 pip install -v -e .
-
-  - name: "Build wheel for Python 3.6, 3.7, 3.8 on Linux x86_64"
-    os: linux
-    dist: bionic
-    stage: Build Linux wheels
-    if: tag IS present
-    env:
-      - CIBW_BEFORE_ALL="yum install -y openblas-devel gtest wget"
-      - CIBW_BEFORE_BUILD="pip install -r requirements.txt mkl mkl-include pytest"
-      - CIBW_MANYLINUX_X86_64_IMAGE="manylinux2014"
-      - CIBW_MANYLINUX_I686_IMAGE="manylinux2014"
-      - CIBW_BUILD="cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64"
-      # - CIBW_SKIP="cp27-* cp35-* cp38-*"
-      # - CIBW_TEST_COMMAND="pytest -v -s tests/"
-    install:
-      - python3 -m pip install cibuildwheel==1.6.0
-    script:
-      # build the wheels, put them into './wheelhouse'
-      - python3 -m cibuildwheel --output-dir wheelhouse
-      # The plan is to upload the wheels via twine only when the commit is tagged
-      # python3 -m twine <..>
-
   - name: "Build wheel for Python 3.6, 3.7, 3.8 on OS X"
     os: osx
     stage: Build OSX wheels
-    if: tag IS present
+    # if: tag IS present
     addons:
       homebrew:
         packages:
