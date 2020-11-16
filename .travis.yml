@@ -48,7 +48,7 @@ jobs:
       # - CIBW_SKIP="cp27-* cp35-* cp38-*"
       # - CIBW_TEST_COMMAND="pytest -v -s tests/"
     before_install:
-      - git clone -b aihwkit git@github.com:filemaster/delocate.git
+      - git clone -b aihwkit https://github.com/filemaster/delocate.git
     install:
       - python3 -m pip install cibuildwheel==1.6.0
     script:
