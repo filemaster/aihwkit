@@ -18,7 +18,7 @@ notifications:
 
 # sudo: required // Sudo is deprecated
 
-language: python
+language: minimal
 
 services: docker
 
